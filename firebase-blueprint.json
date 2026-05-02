@@ -1,0 +1,48 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile information",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
+        "displayName": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "loyaltyPunches": { "type": "number", "default": 0 },
+        "favoriteItems": { 
+          "type": "array", 
+          "items": { "type": "string" },
+          "default": []
+        },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email"]
+    },
+    "Reservation": {
+      "title": "Reservation",
+      "description": "Cafe table reservation",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "tableId": { "type": "number" },
+        "date": { "type": "string" },
+        "time": { "type": "string" },
+        "status": { "type": "string", "enum": ["confirmed", "cancelled"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "tableId", "date", "time", "status"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "Store user profiles"
+    },
+    "/reservations/{reservationId}": {
+      "schema": "Reservation",
+      "description": "Store cafe reservations"
+    }
+  }
+}

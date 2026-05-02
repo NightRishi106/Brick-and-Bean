@@ -1,0 +1,79 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // Entity Validations
+    function isValidUser(data) {
+      return data.keys().hasAll(['uid', 'email', 'createdAt', 'updatedAt']) &&
+             data.keys().size() >= 4 &&
+             data.uid is string && data.uid.size() <= 128 &&
+             data.email is string && data.email.size() <= 256;
+    }
+
+    function isValidReservation(data) {
+      return data.keys().hasAll(['userId', 'tableId', 'date', 'time', 'status', 'createdAt']) &&
+             data.keys().size() == 6 &&
+             data.userId is string && data.userId.size() <= 128 &&
+             data.tableId is number &&
+             data.date is string && data.date.size() <= 20 &&
+             data.time is string && data.time.size() <= 20 &&
+             data.status in ['confirmed', 'cancelled'];
+    }
+
+    // Paths
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidUser(incoming()) && 
+                       incoming().uid == userId &&
+                       incoming().createdAt == request.time &&
+                       incoming().updatedAt == request.time;
+      allow update: if isOwner(userId) && isValidUser(incoming()) &&
+                       incoming().updatedAt == request.time &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().uid == existing().uid &&
+                       incoming().email == existing().email &&
+                       incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'photoURL', 'updatedAt', 'loyaltyPunches', 'favoriteItems']);
+    }
+
+    match /reservations/{reservationId} {
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow get: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() && 
+                       isValidReservation(incoming()) && 
+                       incoming().userId == request.auth.uid &&
+                       incoming().createdAt == request.time;
+      allow update: if isSignedIn() &&
+                       resource.data.userId == request.auth.uid &&
+                       isValidReservation(incoming()) &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly(['status', 'date', 'time']);
+      allow delete: if isSignedIn() && resource.data.userId == request.auth.uid;
+    }
+  }
+}

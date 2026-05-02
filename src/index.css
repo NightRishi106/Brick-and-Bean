@@ -1,0 +1,70 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Lora:ital,wght@0,400..700;1,400..700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Lora", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Montserrat", sans-serif;
+
+  --color-cafe-charcoal: #2F3131;
+  --color-cafe-brick: #D2691E;
+  --color-cafe-cream: #F5F5DC;
+  --color-cafe-sand: #E6D5B8;
+  --color-cafe-carbon: #1A1A1A;
+}
+
+@layer base {
+  :root {
+    --bg-primary: #F5F5DC;
+    --text-primary: #2F3131;
+    --card-bg: #FFFFFF;
+    --border-color: rgba(47, 49, 49, 0.1);
+  }
+
+  [data-theme='dark'] {
+    --bg-primary: #1A1A1A;
+    --text-primary: #F5F5DC;
+    --card-bg: #2F3131;
+    --border-color: rgba(210, 105, 30, 0.2);
+  }
+
+  body {
+    @apply bg-[var(--bg-primary)] text-[var(--text-primary)] font-sans antialiased transition-colors duration-500;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display font-bold uppercase tracking-wider;
+  }
+}
+
+.glass-overlay {
+  background: rgba(47, 49, 49, 0.4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.corkboard {
+  background-color: #cdaa7d;
+  background-image: radial-gradient(#d4b38d 10%, transparent 11%),
+    radial-gradient(#d4b38d 10%, transparent 11%);
+  background-size: 30px 30px;
+  background-position: 0 0, 15px 15px;
+}
+
+.seat-map-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+.table-indicator {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.animate-pulse-soft {
+  animation: pulse-soft 3s infinite ease-in-out;
+}
